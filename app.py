@@ -1,4 +1,4 @@
-from flask import Flask, jsonify, render_template, session, request, redirect
+from flask import Flask, flash, jsonify, render_template, session, request, redirect
 from flask_debugtoolbar import DebugToolbarExtension
 from sqlalchemy import delete
 
@@ -22,7 +22,7 @@ db.create_all()
 def redirect_register():
     return redirect("/register")
 
-@app.routes("/register", methods=["GET", "POST"])
+@app.route("/register", methods=["GET", "POST"])
 def register():
     form = RegisterForm()
 
@@ -40,13 +40,13 @@ def register():
         session["user_id"] = user.username
 
         # on successful login, redirect to secret page
-        return redirect("/secret")
+        return redirect("/user/<username>")
 
     else:
         return render_template("register.html", form=form)
 
 
-@app.routes("/login",methods=["GET","POST"])
+@app.route("/login",methods=["GET","POST"])
 def login():
     """handles login"""
     form = LoginForm()
@@ -59,11 +59,26 @@ def login():
         user = User.authenticate(name, pwd)
 
         if user:
-            session["user_id"] = user.id
-            return redirect("/secret")
+            session["user"] = user.username
+            return redirect("/user/<username>")
 
         else:
             form.username.errors = ["Bad name/password"]
 
     return render_template("login.html", form=form)
-# end-login
+
+@app.get("/user/<username>")
+def display_secret(username):
+
+    user = User.query.get_or_404(username)
+
+    if "user" not in session:
+        flash("You must be logged in")
+        return redirect("/login")
+
+    elif session["user"] != username:
+        flash("Wrong user!")
+        return redirect("/")
+
+    else:
+        return render_template("secret.html", user=user)
