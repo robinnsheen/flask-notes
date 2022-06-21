@@ -58,3 +58,13 @@ class User(db.Model):
             first_name=first_name,
             last_name=last_name,
             )
+
+    @classmethod
+    def authenticate(cls, username, pwd):
+        """validate that the user exists and password is correct"""
+
+        u = cls.query.filter_by(username=username).one_or_none()
+        if u and bcrypt.check_password_hash(u.password, pwd):
+            return u
+        else:
+            return False

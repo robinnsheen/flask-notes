@@ -3,7 +3,7 @@ from flask_debugtoolbar import DebugToolbarExtension
 from sqlalchemy import delete
 
 from models import db, connect_db, User
-from forms import RegisterForm
+from forms import RegisterForm, LoginForm
 
 app = Flask(__name__)
 app.config['SQLALCHEMY_DATABASE_URI'] = 'postgresql:///users'
@@ -23,7 +23,7 @@ def redirect_register():
     return redirect("/register")
 
 @app.routes("/register", methods=["GET", "POST"])
-def display_register_form():
+def register():
     form = RegisterForm()
 
     if form.validate_on_submit():
@@ -44,3 +44,26 @@ def display_register_form():
 
     else:
         return render_template("register.html", form=form)
+
+
+@app.routes("/login",methods=["GET","POST"])
+def login():
+    """handles login"""
+    form = LoginForm()
+
+    if form.validate_on_submit():
+        name = form.username.data
+        pwd = form.password.data
+
+
+        user = User.authenticate(name, pwd)
+
+        if user:
+            session["user_id"] = user.id
+            return redirect("/secret")
+
+        else:
+            form.username.errors = ["Bad name/password"]
+
+    return render_template("login.html", form=form)
+# end-login
