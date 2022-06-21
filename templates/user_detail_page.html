@@ -1,0 +1,23 @@
+{% extends 'base.html' %}
+{% block title %}Secret Page{% endblock %}
+
+{% block content %}
+
+  <h1 class="display-4">Welcome to the Chamber of Secrets!</h1>
+
+  <img src="https://media.giphy.com/media/AFZgmywhfOhiw/giphy.gif">
+
+  <p class="lead">You made it!</p>
+
+  <p>{{ user.username }}</p>
+  <p>{{ user.email }}</p>
+  <p>{{ user.first_name }}</p>
+  <p>{{ user.last_name }}</p>
+
+
+  <form action="/logout" method="POST">
+    {{form.hidden_tag()}}
+    <button type="submit" >Logout</button>
+  </form>
+
+{% endblock %}

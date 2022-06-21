@@ -3,7 +3,7 @@ from flask_debugtoolbar import DebugToolbarExtension
 from sqlalchemy import delete
 
 from models import db, connect_db, User
-from forms import RegisterForm, LoginForm
+from forms import RegisterForm, LoginForm, CSRFProtectForm
 
 app = Flask(__name__)
 app.config['SQLALCHEMY_DATABASE_URI'] = 'postgresql:///users'
@@ -18,12 +18,17 @@ app.config['DEBUG_TB_INTERCEPT_REDIRECTS'] = False
 connect_db(app)
 db.create_all()
 
+USER_SESSION_KEY = "username"
+
 @app.get("/")
 def redirect_register():
+    """redirects user to /register page"""
     return redirect("/register")
 
 @app.route("/register", methods=["GET", "POST"])
 def register():
+    """Shows register form handles form submission will redirect back to /register
+    if form is not validated, if validated redirects to /user/<username>."""
     form = RegisterForm()
 
     if form.validate_on_submit():
@@ -37,7 +42,7 @@ def register():
         db.session.add(user)
         db.session.commit()
 
-        session["user_id"] = user.username
+        session["user"] = user.username
 
         # on successful login, redirect to secret page
         return redirect("/user/<username>")
@@ -48,7 +53,8 @@ def register():
 
 @app.route("/login",methods=["GET","POST"])
 def login():
-    """handles login"""
+    """handles login if login successful redirects to /user/<username> else
+    redirects to login.html"""
     form = LoginForm()
 
     if form.validate_on_submit():
@@ -59,8 +65,8 @@ def login():
         user = User.authenticate(name, pwd)
 
         if user:
-            session["user"] = user.username
-            return redirect("/user/<username>")
+            session[USER_SESSION_KEY] = user.username
+            return redirect(f"/user/{user.username}")
 
         else:
             form.username.errors = ["Bad name/password"]
@@ -69,16 +75,30 @@ def login():
 
 @app.get("/user/<username>")
 def display_secret(username):
+    """If user not logged in and tries to access unauthorized page, redirects to
+    login handles logged in users trying to go to UNAUTHORIZED pages.
+     to ("/").  """
 
-    user = User.query.get_or_404(username)
 
-    if "user" not in session:
+    if USER_SESSION_KEY not in session:
         flash("You must be logged in")
         return redirect("/login")
 
-    elif session["user"] != username:
+    elif session[USER_SESSION_KEY] != username:
         flash("Wrong user!")
         return redirect("/")
 
-    else:
-        return render_template("secret.html", user=user)
+    form = CSRFProtectForm()
+    user = User.query.get_or_404(username)
+    return render_template("user_detail_page.html", user=user,form=form)
+
+
+@app.post("/logout")
+def logout():
+    """handles logout pops user out of session"""
+    form = CSRFProtectForm()
+
+    if form.validate_on_submit():
+        session.pop(USER_SESSION_KEY,None)
+
+    return redirect("/")
