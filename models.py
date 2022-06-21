@@ -3,6 +3,7 @@
 from flask_bcrypt import Bcrypt
 from flask_sqlalchemy import SQLAlchemy
 import email_validator
+from sqlalchemy import ForeignKey
 
 db = SQLAlchemy()
 
@@ -69,3 +70,22 @@ class User(db.Model):
             return u
         else:
             return False
+
+class Note(db.Model):
+    """ notes """
+
+    __tablename__ = "notes"
+
+    id = db.Column(db.Integer,
+                    primary_key = True,
+                    autoincrement=True)
+
+    title = db.Column(db.String(100),
+                        nullable = False)
+
+    content = db.Column(db.Text,
+                        nullable=False)
+
+    owner = db.Column(db.Text,
+                        db.ForeignKey("users.username"))
+    user = db.relationship('User', backref='notes')

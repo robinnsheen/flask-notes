@@ -1,9 +1,10 @@
+from re import template
 from flask import Flask, flash, jsonify, render_template, session, request, redirect
 from flask_debugtoolbar import DebugToolbarExtension
 from sqlalchemy import delete
 
-from models import db, connect_db, User
-from forms import RegisterForm, LoginForm, CSRFProtectForm
+from models import Note, db, connect_db, User, Note
+from forms import NotesForm, RegisterForm, LoginForm, CSRFProtectForm
 
 app = Flask(__name__)
 app.config['SQLALCHEMY_DATABASE_URI'] = 'postgresql:///users'
@@ -93,6 +94,8 @@ def display_secret(username):
     return render_template("user_detail_page.html", user=user,form=form)
 
 
+
+
 @app.post("/logout")
 def logout():
     """handles logout pops user out of session"""
@@ -102,3 +105,26 @@ def logout():
         session.pop(USER_SESSION_KEY,None)
 
     return redirect("/")
+
+@app.route("/users/<username>/notes/add", methods= ["GET","POST"])
+def add_note(username):
+    form = NotesForm()
+    user = User.query.get_or_404(username)
+
+
+    if form.validate_on_submit():
+        title = form.title.data
+        content = form.content.data
+        owner = user.username
+        note = Note(title=title,content=content,owner=owner)
+        db.session.add(note)
+        db.session.commit()
+        breakpoint()
+
+        return redirect(f"/user/{username}")
+
+
+
+
+    else:
+        return render_template("notes_form.html", form=form)

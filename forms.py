@@ -16,5 +16,13 @@ class LoginForm(FlaskForm):
     username = StringField("Username", validators=[InputRequired()])
     password = PasswordField("Password", validators=[InputRequired()])
 
+
+class NotesForm(FlaskForm):
+    """form for users notes"""
+    title = StringField("Title", validators=[InputRequired()])
+    content = StringField("content", validators=[InputRequired()])
+
+
+
 class CSRFProtectForm(FlaskForm):
     """Form just for CSRF Protection"""
