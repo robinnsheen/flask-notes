@@ -72,7 +72,7 @@ class User(db.Model):
             return False
 
 class Note(db.Model):
-    """ notes """
+    """ notes properties"""
 
     __tablename__ = "notes"
 

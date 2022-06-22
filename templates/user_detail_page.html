@@ -21,26 +21,29 @@
   </form>
 
   <ul>
-    {% for note in user.user %}
+    {% for note in user.notes %}
     <li>
-      <h1>{{note.title}}</h1>
-        <div>
-          {{ note.content }}
-        </div>
+      <p><b>{{note.title}}</b></p>
+      <p>{{ note.content }}</p>
+      <form action="/notes/{{ note.id }}/update" method = "GET">
+        <button type="submit">Update</button>
+      </form>
+      <form action="/notes/{{ note.id }}/delete" method = "POST">
+        {{form.hidden_tag()}}
+        <button type="submit">Delete</button>
+      </form>
     </li>
-
     {% endfor %}
   </ul>
 
-
-
-
-
-
-
   <form action="/logout" method="POST">
     {{form.hidden_tag()}}
-    <button type="submit" >Logout</button>
+    <button type="submit">Logout</button>
+  </form>
+
+  <form action="/users/{{user.username}}/delete" method="POST">
+    {{form.hidden_tag()}}
+    <button type="submit">Delete User</button>
   </form>
 
 {% endblock %}

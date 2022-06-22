@@ -1,7 +1,7 @@
 {% extends 'base.html' %}
-{% block title %}Notes Form{% endblock %}
+{% block title %}Update Note Form{% endblock %}
 {% block content %}
-<h2>Notes</h2>
+<h2>Update Note</h2>
 <form method="POST">
 
   {{ form.hidden_tag() }}
@@ -18,7 +18,7 @@ if field.widget.input_type != 'hidden' %}
     </p>
   {% endfor %}
 
-  <button type="submit">Add note</button>
+  <button type="submit">Update note</button>
 
 </form>
 {% endblock %}
