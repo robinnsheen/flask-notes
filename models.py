@@ -9,11 +9,13 @@ db = SQLAlchemy()
 
 bcrypt = Bcrypt()
 
+
 def connect_db(app):
     """Connect to database."""
 
     db.app = app
     db.init_app(app)
+
 
 class User(db.Model):
     """User properties"""
@@ -59,7 +61,7 @@ class User(db.Model):
             email=email,
             first_name=first_name,
             last_name=last_name,
-            )
+        )
 
     @classmethod
     def authenticate(cls, username, pwd):
@@ -71,21 +73,23 @@ class User(db.Model):
         else:
             return False
 
+
 class Note(db.Model):
     """ notes properties"""
 
     __tablename__ = "notes"
 
     id = db.Column(db.Integer,
-                    primary_key = True,
-                    autoincrement=True)
+                   primary_key=True,
+                   autoincrement=True)
 
     title = db.Column(db.String(100),
-                        nullable = False)
+                      nullable=False)
 
     content = db.Column(db.Text,
                         nullable=False)
 
     owner = db.Column(db.Text,
-                        db.ForeignKey("users.username"))
+                      db.ForeignKey("users.username"))
+
     user = db.relationship('User', backref='notes')
